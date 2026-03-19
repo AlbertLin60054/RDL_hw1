@@ -1,14 +1,15 @@
 # 強化學習作業一 (RL HW1)
 
-本專案使用 Python Flask 與前端 HTML/JavaScript 實作了一個強化的網格地圖開發 (Gridworld) 作業。專案目前完成的功能包含 **HW1-1 網格地圖開發** 與 **HW1-2 策略顯示與價值評估** 的完整流程。
+🚀 **Live Demo 線上展示:** [https://AlbertLin60054.github.io/RDL_hw1/](https://AlbertLin60054.github.io/RDL_hw1/)
+
+本專案使用前端 HTML/JavaScript 實作了一個強化的網格地圖開發 (Gridworld) 作業。專案目前完成的功能包含 **HW1-1 網格地圖開發** 與 **HW1-2 策略顯示與價值評估** 的完整流程。所有演算法皆於前端靜態展示，無須運行任何後端伺服器！
 
 ## 專案結構
 ```text
 RDL_Hw1/
-├── app.py                # Flask 後端應用程式 (負責價值評估演算法的運算與伺服器架設)
+├── index.html            # 前端網頁應用程式 (包含 UI 互動邏輯與 Policy Evaluation 價值演算法)
 ├── README.md             # 本說明檔案
-└── templates/
-    └── index.html        # 前端 UI 介面展示與使用者網格互動的邏輯
+└── chat_history.md       # 開發過程的完整對話紀錄 log
 ```
 
 ## 功能完成事項摘要 (Completed Requirements)
