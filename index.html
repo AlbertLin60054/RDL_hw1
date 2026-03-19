@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>HW1 網格地圖開發與策略評估</title>
+    <style>
+        body {
+            font-family: serif;
+            margin: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        h2 {
+            font-size: 20px;
+        }
+
+        .form-container {
+            margin-bottom: 20px;
+        }
+
+        .instruction {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td {
+            border: 1px solid black;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Generate n x n Square</h1>
+    <div class="form-container">
+        <label for="gridInput">Enter a number between 3 and 10:</label>
+        <input type="number" id="gridInput" min="3" max="10" value="5" required style="width: 50px;">
+        <button onclick="generateSquare()">Generate Square</button>
+    </div>
+
+    <div id="gridArea" style="display: none;">
+        <h2 id="gridTitle"></h2>
+        <ol class="instruction">
+            <li>Click on a cell to set up the start grid as green or the end grid as red.</li>
+        </ol>
+        <table id="mainGrid"></table>
+
+        <div id="evalBtnContainer" style="display: none; margin-top: 20px;">
+            <button onclick="evaluatePolicy()">Evaluate Policy</button>
+        </div>
+
+        <div id="resultsContainer" style="display: none; margin-top: 20px; display: flex; gap: 40px;">
+            <div>
+                <h3>Value Matrix</h3>
+                <table id="valueGrid"></table>
+            </div>
+            <div>
+                <h3>Policy Matrix</h3>
+                <table id="policyGrid"></table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gridSize = 0;
+        let clickCount = 0;
+        let totalClicksAllowed = 0;
+        let startIdx = null;
+        let endIdx = null;
+        let obstacles = [];
+
+        function generateSquare() {
+            const inputVal = parseInt(document.getElementById('gridInput').value);
+            if (!inputVal || inputVal < 3 || inputVal > 10) {
+                alert("Please enter a valid number between 3 and 10.");
+                return;
+            }
+            gridSize = inputVal;
+            clickCount = 0;
+            startIdx = null;
+            endIdx = null;
+            obstacles = [];
+            totalClicksAllowed = 2 + (gridSize - 2);
+
+            document.getElementById('gridArea').style.display = 'block';
+            document.getElementById('gridTitle').innerText = `${gridSize} x ${gridSize} Square:`;
+            document.getElementById('evalBtnContainer').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'none';
+
+            const table = document.getElementById('mainGrid');
+            table.innerHTML = '';
+            let count = 0;
+            for (let r = 0; r < gridSize; r++) {
+                const tr = document.createElement('tr');
+                for (let c = 0; c < gridSize; c++) {
+                    const td = document.createElement('td');
+                    td.innerText = count + 1;
+                    const idx = count;
+                    td.onclick = function () { handleCellClick(td, idx); };
+                    tr.appendChild(td);
+                    count++;
+                }
+                table.appendChild(tr);
+            }
+        }
+
+        function handleCellClick(td, idx) {
+            if (td.style.backgroundColor) return;
+
+            if (clickCount < totalClicksAllowed) {
+                if (clickCount === 0) {
+                    td.style.backgroundColor = 'green';
+                    startIdx = idx;
+                } else if (clickCount === 1) {
+                    td.style.backgroundColor = 'red';
+                    endIdx = idx;
+                } else {
+                    td.style.backgroundColor = 'gray';
+                    obstacles.push(idx);
+                }
+                clickCount++;
+
+                if (clickCount === totalClicksAllowed) {
+                    document.getElementById('evalBtnContainer').style.display = 'block';
+                }
+            }
+        }
+
+        function evaluatePolicy() {
+            const actions = ['U', 'D', 'L', 'R'];
+            const policyStr = {};
+            const totalCells = gridSize * gridSize;
+
+            for (let i = 0; i < totalCells; i++) {
+                if (obstacles.includes(i) || i === endIdx) {
+                    policyStr[i] = null;
+                } else {
+                    const randomAction = actions[Math.floor(Math.random() * actions.length)];
+                    policyStr[i] = randomAction;
+                }
+            }
+
+            let V = {};
+            for (let i = 0; i < totalCells; i++) V[i] = 0.0;
+            const gamma = 0.9;
+            const reward = -1.0;
+
+            function getNextState(s, a) {
+                let row = Math.floor(s / gridSize);
+                let col = s % gridSize;
+                if (a === 'U') row -= 1;
+                else if (a === 'D') row += 1;
+                else if (a === 'L') col -= 1;
+                else if (a === 'R') col += 1;
+
+                if (row < 0 || row >= gridSize || col < 0 || col >= gridSize) return s;
+
+                const next_s = row * gridSize + col;
+                if (obstacles.includes(next_s)) return s;
+                return next_s;
+            }
+
+            let delta = 1;
+            while (delta >= 1e-4) {
+                delta = 0;
+                let new_V = { ...V };
+                for (let s = 0; s < totalCells; s++) {
+                    if (obstacles.includes(s) || s === endIdx) continue;
+                    const a = policyStr[s];
+                    const next_s = getNextState(s, a);
+                    const v = reward + gamma * V[next_s];
+                    delta = Math.max(delta, Math.abs(V[s] - v));
+                    new_V[s] = v;
+                }
+                V = new_V;
+            }
+
+            const arrows = { 'U': '↑', 'D': '↓', 'L': '←', 'R': '→' };
+            const resultPolicy = {};
+            const resultV = {};
+            for (let i = 0; i < totalCells; i++) {
+                if (obstacles.includes(i)) {
+                    resultPolicy[i] = '';
+                    resultV[i] = '';
+                } else if (i === endIdx) {
+                    resultPolicy[i] = '🏁';
+                    resultV[i] = 0.0;
+                } else {
+                    resultPolicy[i] = arrows[policyStr[i]];
+                    resultV[i] = (Math.round(V[i] * 100) / 100).toFixed(2);
+                }
+            }
+
+            document.getElementById('resultsContainer').style.display = 'flex';
+            createGridTable('valueGrid', resultV);
+            createGridTable('policyGrid', resultPolicy);
+            document.getElementById('evalBtnContainer').style.display = 'none';
+        }
+
+        function createGridTable(tableId, dataObj) {
+            const table = document.getElementById(tableId);
+            table.innerHTML = '';
+            for (let r = 0; r < gridSize; r++) {
+                const tr = document.createElement('tr');
+                for (let c = 0; c < gridSize; c++) {
+                    const idx = r * gridSize + c;
+                    const td = document.createElement('td');
+                    td.innerText = dataObj[idx];
+                    if (obstacles.includes(idx)) {
+                        td.style.backgroundColor = 'gray';
+                    }
+                    tr.appendChild(td);
+                }
+                table.appendChild(tr);
+            }
+        }
+    </script>
+</body>
+
+</html>
