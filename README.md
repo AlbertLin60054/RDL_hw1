@@ -36,10 +36,10 @@ RDL_Hw1/
      - **Value Matrix**: 顯示每一個格子計算出來的 $V(s)$ 值。
      - **Policy Matrix**: 顯示該格子對應指引方向的政策箭頭。
 
-## 執行方式
-於專案目錄底下啟動 Terminal 執行：
-```bash
-pip install flask
-python app.py
-```
-啟動後，請開啟瀏覽器並輸入網址：`http://127.0.0.1:5000` 即可開始操作上述所有功能。
+## 執行方式與 GitHub Pages 展示
+本專案已經完全改寫為**純前端 (Static Frontend)** 應用程式，所有的 Policy Evaluation 運算邏輯皆直接由瀏覽器的 JavaScript 執行，因此再也不需要依賴 Flask 伺服器了！
+
+👉 **您現在可以直接透過 GitHub Pages 在線上展示與操作此作業：**
+[https://AlbertLin60054.github.io/RDL_hw1/](https://AlbertLin60054.github.io/RDL_hw1/)
+
+*(備註：因已更新為靜態架構，若要在本機端測試，只需直接雙擊打開 `index.html` 檔案即可！)*
