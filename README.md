@@ -2,7 +2,7 @@
 
 🚀 **Live Demo 線上展示:** [https://AlbertLin60054.github.io/RDL_hw1/](https://AlbertLin60054.github.io/RDL_hw1/)
 
-本專案使用前端 HTML/JavaScript 實作了一個強化的網格地圖開發 (Gridworld) 作業。專案目前完成的功能包含 **HW1-1 網格地圖開發** 與 **HW1-2 策略顯示與價值評估** 的完整流程。所有演算法皆於前端靜態展示，無須運行任何後端伺服器！
+本專案使用前端 HTML/JavaScript 實作了一個強化的網格地圖開發 (Gridworld) 作業。專案目前完成的功能包含 **HW1-1 網格地圖開發**、**HW1-2 策略顯示與價值評估**，以及 **HW1-3 使用價值迭代推導最佳政策** 的完整流程。所有演算法皆於前端靜態展示，無須運行任何後端伺服器！
 
 ## 專案結構
 ```text
@@ -25,7 +25,7 @@ RDL_Hw1/
 ### HW1-2: 策略顯示與價值評估 (Policy Evaluation)
 1. **策略產生 (Policy Generation)**: 
    - 當使用者點選完畢所有的格點後，會跳出「Evaluate Policy」按鈕。
-   - 點擊按鈕會透過非同步請求給 Flask 後端，後端程式會對所有可行的網格 (非終端、非障礙物) 隨機指定一個固定的前往方向（`↑`、`↓`、`←`、`→`），形成一個**隨機確定性策略 (Deterministic Random Policy)**。
+   - 點擊按鈕後，JavaScript 會對所有可行的網格 (非終端、非障礙物) 隨機指定一個固定的前往方向（`↑`、`↓`、`←`、`→`），形成一個**隨機確定性策略 (Deterministic Random Policy)**。
 2. **策略評估 (Iterative Policy Evaluation)**:
    - 為了展現評估概念，環境使用以下參數：
      - **Discount Factor ($\gamma$)**: 0.9 (確保任意隨便瞎指的策略最後都能收斂出價值)
@@ -33,9 +33,19 @@ RDL_Hw1/
      - **Terminal Reward**: 走到終結點時即完成，終結點本身的預期價值 $V(s) = 0$。
    - 由於隨機生成的單向箭頭很容易卡入無限迴圈（撞牆出不去或是兩個格子互指互相彈開），而根據無窮等比極數收斂定理：$V = -1 / (1 - \gamma)$，因此你會觀察到大多數不能導向終點的格子會趨近於 **-10** 的精準數學價值。
 3. **結果視覺化**:
-   - 演算法收斂並回傳前端後，會動態在畫面下方展開兩個矩陣做對照：
+   - 演算法收斂後，會動態在畫面下方展開兩個矩陣做對照：
      - **Value Matrix**: 顯示每一個格子計算出來的 $V(s)$ 值。
      - **Policy Matrix**: 顯示該格子對應指引方向的政策箭頭。
+
+### HW1-3: 使用價值迭代推導最佳政策 (Value Iteration)
+1. **價值迭代演算法 (Value Iteration Algorithm)**:
+   - 在執行完 HW1-2 之後，會出現「Value Iteration (Optimal Policy)」按鈕。
+   - 點擊後將執行價值迭代演算法，以 Bellman Optimality Equation 更新各狀態的最佳價值 $V^*(s)$ 與對應的最佳行動 $\arg\max_a$。
+2. **最佳政策與價值顯示**:
+   - 演算法將自動取代原本顯示的矩陣，改為展示 **最佳價值函數 $V(s)$** 與 **最佳政策箭頭**。
+3. **最佳化路徑追蹤 (Optimal Path Visualization)**:
+   - 透過得出的最佳策略，系統會從起點開始一步步導航至終點。
+   - 視覺化標示出整條從起點到終點的最佳相連路徑（以醒目的淡綠色底色顯示），讓最終演算法的效果一目了然！
 
 ## 執行方式與 GitHub Pages 展示
 本專案已經完全改寫為**純前端 (Static Frontend)** 應用程式，所有的 Policy Evaluation 運算邏輯皆直接由瀏覽器的 JavaScript 執行，因此再也不需要依賴 Flask 伺服器了！
